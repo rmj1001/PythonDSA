@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+
 def merge[T](left: list[T], right: list[T]) -> list[T]:
     result: list[T] = []
     i = 0

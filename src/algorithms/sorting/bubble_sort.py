@@ -1,5 +1,7 @@
 from copy import deepcopy
+
 from src.lib.algos.sorting.swap import swap
+
 
 def bubble_up[T](arr: list[T], top_index: int) -> list[T]:
     for j in range(0, top_index, 1):

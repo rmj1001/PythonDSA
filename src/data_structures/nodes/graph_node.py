@@ -1,6 +1,5 @@
 lazy from src.lib.data_structs.graph import GraphException
 
-
 type Neighbors[I] = dict[I, int]
 
 

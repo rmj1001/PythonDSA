@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+
 def insertion_sort[T](arr: list[T], copy: bool = True) -> list[T]:
     if copy:
         arr = deepcopy(arr)
@@ -10,7 +11,7 @@ def insertion_sort[T](arr: list[T], copy: bool = True) -> list[T]:
         insert_idx = i
         current_val = arr.pop(i)
 
-        for j in range(i-1, -1, -1):
+        for j in range(i - 1, -1, -1):
             if arr[j] > current_val:
                 insert_idx = j
 

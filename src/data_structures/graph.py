@@ -2,9 +2,11 @@ from .nodes.graph_node import GraphNode
 
 type NodeEdge[I] = tuple[I, I]
 
+
 class GraphException[T](Exception):
     def __init__(self, message: T):
         super().__init__(message)
+
 
 class Graph[I, T]:
     nodes: dict[I, GraphNode[I, T]]

@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+
 def gnome_sort[T](arr: list[T], copy: bool = True) -> list[T]:
     """
     Sorting algorithm that works like a gnome sorting flowerpots
