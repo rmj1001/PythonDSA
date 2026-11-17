@@ -163,6 +163,14 @@ class Graph[I, T]:
                 to_node_id: I,
                 bidirectional: bool = False
                 ) -> bool:
+        """
+        Check if an edge exists between two nodes, either in one direction or two.
+
+        :param from_node_id: The first node ID
+        :param to_node_id: The second node ID
+        :param bidirectional: Whether the edge goes both ways
+        :return: True if edge exists, else False
+        """
 
         if not self.has_node(from_node_id) or not self.has_node(to_node_id):
             return False
@@ -181,6 +189,13 @@ class Graph[I, T]:
                  weight: int = 0,
                  bidirectional: bool = False
     ) -> None:
+        """
+        Create an edge between two nodes
+        :param from_node_id: The first node ID
+        :param to_node_id: The second node ID
+        :param weight: The weight of the edge
+        :param bidirectional: If the edge exists in two directions
+        """
         if not self.has_node(from_node_id):
             raise GraphException(f'Node with id {from_node_id} does not exist.')
 
@@ -209,6 +224,12 @@ class Graph[I, T]:
         to_node_id: I,
         bidirectional: bool = False,
     ) -> None:
+        """
+        Remove an edge between two nodes.
+        :param from_node_id: First node ID
+        :param to_node_id: Second node ID
+        :param bidirectional: Remove edges in two directions between nodes
+        """
         if not self.has_node(from_node_id):
             raise GraphException(f'Node with id {from_node_id} does not exist.')
 
