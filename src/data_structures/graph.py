@@ -1,6 +1,5 @@
 from .queue import Queue
 from .stack import Stack
-
 type NodeEdge[I] = tuple[I, I]
 type Neighbors[I] = dict[I, int]
 
@@ -33,6 +32,9 @@ class GraphNode[I, T]:
             return NotImplemented
 
         return self.value == other.value
+
+    def __repr__(self) -> str:
+        return f'GraphNode(id={self.node_id}, value={self.value}, neighbors={self.neighbors})'
 
     def count_edges(self):
         """
@@ -102,6 +104,13 @@ class Graph[I, T]:
         :return:
         """
         return len(self) > 0
+
+    def __repr__(self) -> str:
+        """
+        Create string representation of the graph
+        :return: string
+        """
+        return str('\n'.join([str(node) for node in self.nodes.values()]))
 
     def is_empty(self) -> bool:
         """
