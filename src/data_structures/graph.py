@@ -1,11 +1,86 @@
-from .nodes.graph_node import GraphNode
+from .queue import Queue
+from .stack import Stack
 
 type NodeEdge[I] = tuple[I, I]
+type Neighbors[I] = dict[I, int]
 
 
 class GraphException[T](Exception):
     def __init__(self, message: T):
         super().__init__(message)
+
+
+class GraphNode[I, T]:
+    def __init__(self, node_id: I, value: T, neighbors: Neighbors | None = None) -> None:
+        self.node_id: I = node_id
+        self.value: T = value
+        self.neighbors: Neighbors[I] = neighbors if neighbors is not None else {}
+
+    def __len__(self) -> int:
+        """
+        Alias for GraphNode.count_edges()
+        :return: Number of edges
+        """
+        return self.count_edges()
+
+    def __eq__(self, other: object) -> bool:
+        """
+        Check if values of two nodes are equal
+        :param other: Other node
+        :return: True if other object is GraphNode and values are equal, else False
+        """
+        if not isinstance(other, GraphNode):
+            return NotImplemented
+
+        return self.value == other.value
+
+    def count_edges(self):
+        """
+        Get the number of edges between this node and other nodes
+        :return: Number of edges
+        """
+        return len(self.neighbors)
+
+    def is_edge(self, other_node: I) -> bool:
+        """
+        Check to see if other node has an edge with this node
+        :param other_node: ID of other node
+        :return: True if edge exists, else False
+        """
+        return other_node in self.neighbors
+
+    def add_edge(self, other_node: I, weight: int = 0) -> None:
+        """
+        Add an edge between this node and another node
+        :param other_node: ID of other node
+        :param weight: The weight of the edge
+        """
+        if other_node in self.neighbors:
+            raise GraphException(f'Unidirectional edge exists from {self.node_id} to {other_node}.')
+
+        self.neighbors[other_node] = weight
+
+    def remove_edge(self, other_node: I) -> None:
+        """
+        Remove an edge between this node and another node
+        :param other_node: ID of other node
+        """
+        if other_node not in self.neighbors:
+            raise GraphException(f'Unidirectional edge does not exist from {self.node_id} to {other_node}.')
+
+        del self.neighbors[other_node]
+
+    def all_edges(self) -> list[tuple[I, I]]:
+        """
+        Get a list of all edges for this node, denoted by tuple[node_id, node_id]
+        :return: List of edges
+        """
+        edges: list[tuple[I, I]] = []
+
+        for neighbor in self.neighbors:
+            edges.append((self.node_id, neighbor))
+
+        return edges
 
 
 class Graph[I, T]:
@@ -157,3 +232,64 @@ class Graph[I, T]:
                 return True
 
         return False
+
+    def bfs(self, start_node: GraphNode[I, T]) -> list[T]:
+        """
+        Search through all nodes connected to a start node
+        without repeating nodes, by visiting each child
+        node before their descendants
+
+        :param start_node: The starting node
+        :returns: List of values from all visited nodes
+        """
+        if self.nodes.get(start_node.node_id) is not start_node:
+            return []
+
+        visited: set[I] = {start_node.node_id}
+        results: list[T] = []
+        q: Queue[GraphNode[I, T]] = Queue()
+
+        q.enqueue(start_node)
+
+        while not q.is_empty():
+            current = q.dequeue()
+            results.append(current.value)
+
+            for neighbor_id in current.neighbors.keys():
+                if neighbor_id not in visited:
+                    visited.add(neighbor_id)
+                    q.enqueue(self.nodes[neighbor_id])
+
+        return results
+
+    def dfs(self, start_node: GraphNode[I, T]) -> list[T]:
+        """
+        Search through all nodes connected to a start node
+        without repeating nodes, by visiting the descendants
+        of each node first, before moving to other child nodes
+
+        :param start_node: The starting node
+        :returns: List of values from all visited nodes
+        """
+        if self.nodes.get(start_node.node_id) is not start_node:
+            return []
+
+        visited: set[I] = set()
+        results: list[T] = []
+        aux_stack: Stack[GraphNode[I, T]] = Stack()
+        aux_stack.push(start_node)
+
+        while not aux_stack.is_empty():
+            current = aux_stack.pop()
+
+            if current.node_id in visited:
+                continue
+
+            for c in current.neighbors.keys():
+                if c not in visited:
+                    aux_stack.push(self.nodes[c])
+
+            visited.add(current.node_id)
+            results.append(current.value)
+
+        return results

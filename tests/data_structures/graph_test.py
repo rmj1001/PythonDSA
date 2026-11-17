@@ -1,5 +1,5 @@
 import unittest
-from src.data_structs.graph import Graph, GraphException
+from src.data_structures.graph import Graph, GraphException, GraphNode
 from random import randint
 
 def create_random_graph(nodes: int = 10, edges: bool = False) -> Graph[int, int]:
@@ -130,6 +130,120 @@ class TestGraph(unittest.TestCase):
 
         self.assertTrue(graph.node_in_edges(0))
         self.assertFalse(graph.node_in_edges(9))
+
+    def test_bfs(self):
+        graph: Graph = Graph()
+
+        # Create nodes
+        graph.insert(0, 0)
+        graph.insert(1, 10)
+        graph.insert(2, 20)
+        graph.insert(3, 30)
+        graph.insert(4, 40)
+
+        graph.nodes[0].add_edge(1)
+        graph.nodes[0].add_edge(2)
+        graph.nodes[1].add_edge(2)
+        graph.nodes[2].add_edge(3)
+        graph.nodes[2].add_edge(0)
+        graph.nodes[3].add_edge(4)
+
+        nodes: list[GraphNode] = [node for node in graph.nodes.values()]
+        bfs: list[int] = graph.bfs(nodes[0])
+        target: list[int] = [0, 10, 20, 30, 40]
+
+        self.assertEqual(bfs, target)
+
+    def test_dfs(self):
+        graph: Graph = Graph()
+
+        # Create nodes
+        graph.insert(0, 0)
+        graph.insert(1, 10)
+        graph.insert(2, 20)
+        graph.insert(3, 30)
+        graph.insert(4, 40)
+
+        graph.nodes[0].add_edge(1)
+        graph.nodes[0].add_edge(2)
+        graph.nodes[1].add_edge(2)
+        graph.nodes[2].add_edge(3)
+        graph.nodes[2].add_edge(0)
+        graph.nodes[3].add_edge(4)
+
+        nodes: list[GraphNode] = [node for node in graph.nodes.values()]
+        dfs: list[int] = graph.dfs(nodes[0])
+        target: list[int] = [0, 20, 30, 40, 10]
+
+        self.assertEqual(dfs, target)
+
+    def test_node_methods_and_weights(self):
+        graph: Graph[int, int] = Graph()
+        graph.insert(0, 100)
+        graph.insert(1, 200)
+
+        node0 = graph.nodes[0]
+        node0.add_edge(1, weight=5)
+
+        self.assertEqual(len(node0), 1)
+        self.assertTrue(node0.is_edge(1))
+        self.assertFalse(node0.is_edge(0))
+        self.assertEqual(node0.neighbors[1], 5)
+        self.assertEqual(node0.all_edges(), [(0, 1)])
+        self.assertNotEqual(node0, 100)  # __eq__ with non-GraphNode
+
+        # Duplicate edge raises GraphException
+        with self.assertRaises(GraphException):
+            node0.add_edge(1)
+
+        # Removing valid and non-existent edges
+        node0.remove_edge(1)
+        self.assertEqual(len(node0), 0)
+        with self.assertRaises(GraphException):
+            node0.remove_edge(1)
+
+    def test_exception_paths(self):
+        graph: Graph[int, int] = create_random_graph(4, edges=False)
+
+        # Removing non-existent node
+        with self.assertRaises(GraphException):
+            graph.remove_node(99)
+
+        # Removing bidirectional edge when none exists
+        with self.assertRaises(GraphException):
+            graph.remove_bidirectional_edge(0, 1)
+
+        # Removing bidirectional edge when only unidirectional exists
+        graph.nodes[0].add_edge(1)
+        with self.assertRaises(GraphException):
+            graph.remove_bidirectional_edge(0, 1)
+
+        # Adding bidirectional edge when unidirectional already exists
+        with self.assertRaises(GraphException):
+            graph.add_bidirectional_edge(0, 1)
+
+    def test_traversal_edge_cases(self):
+        graph: Graph[int, int] = Graph()
+        graph.insert(0, 10)
+        graph.insert(1, 20)
+        graph.insert(2, 30)  # Disconnected component
+
+        # Self-loop + single edge
+        graph.nodes[0].add_edge(0)
+        graph.nodes[0].add_edge(1)
+
+        # Should not loop infinitely or duplicate 10; should not reach node 2
+        self.assertEqual(graph.bfs(graph.nodes[0]), [10, 20])
+        self.assertEqual(graph.dfs(graph.nodes[0]), [10, 20])
+
+        # Isolated node traversal
+        self.assertEqual(graph.bfs(graph.nodes[2]), [30])
+        self.assertEqual(graph.dfs(graph.nodes[2]), [30])
+
+        # Detached/foreign node not in graph
+        foreign_node = GraphNode(0, 10)
+        self.assertEqual(graph.bfs(foreign_node), [])
+        self.assertEqual(graph.dfs(foreign_node), [])
 
 if __name__ == '__main__':
     unittest.main()
