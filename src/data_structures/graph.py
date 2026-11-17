@@ -39,36 +39,36 @@ class GraphNode[I, T]:
         Get the number of edges between this node and other nodes
         :return: Number of edges
         """
-        return len(self.neighbors)
+        return len(self.neighbors.keys())
 
-    def is_edge(self, other_node: I) -> bool:
+    def is_edge(self, neighbor_id: I) -> bool:
         """
         Check to see if other node has an edge with this node
-        :param other_node: ID of other node
+        :param neighbor_id: ID of other node
         :return: True if edge exists, else False
         """
-        return other_node in self.neighbors
+        return neighbor_id in self.neighbors.keys()
 
-    def add_edge(self, other_node: I, weight: int = 0) -> None:
+    def add_edge(self, neighbor_id: I, weight: int = 0) -> None:
         """
         Add an edge between this node and another node
-        :param other_node: ID of other node
+        :param neighbor_id: ID of other node
         :param weight: The weight of the edge
         """
-        if other_node in self.neighbors:
-            raise GraphException(f'Unidirectional edge exists from {self.node_id} to {other_node}.')
+        if self.is_edge(neighbor_id):
+            raise GraphException(f'Unidirectional edge exists from {self.node_id} to {neighbor_id}.')
 
-        self.neighbors[other_node] = weight
+        self.neighbors[neighbor_id] = weight
 
-    def remove_edge(self, other_node: I) -> None:
+    def remove_edge(self, neighbor_id: I) -> None:
         """
         Remove an edge between this node and another node
-        :param other_node: ID of other node
+        :param neighbor_id: ID of other node
         """
-        if other_node not in self.neighbors:
-            raise GraphException(f'Unidirectional edge does not exist from {self.node_id} to {other_node}.')
+        if not self.is_edge(neighbor_id):
+            raise GraphException(f'Unidirectional edge does not exist from {self.node_id} to {neighbor_id}.')
 
-        del self.neighbors[other_node]
+        del self.neighbors[neighbor_id]
 
     def all_edges(self) -> list[tuple[I, I]]:
         """
@@ -110,6 +110,15 @@ class Graph[I, T]:
         """
         return len(self) == 0
 
+    def has_node(self, node_id: I) -> bool:
+        """
+        Check if a node ID exists in the graph
+
+        :param node_id: The node's ID
+        :return: True if node exists, else False
+        """
+        return node_id in self.nodes.keys()
+
     def count_edges(self) -> int:
         """
         Get the total number of edges in the graph
@@ -128,7 +137,7 @@ class Graph[I, T]:
         :param node_id: The ID for the new node
         :param value: The node's value
         """
-        if node_id in self.nodes:
+        if self.has_node(node_id):
             raise GraphException(f'Node with id {node_id} already exists.')
 
         self.nodes[node_id] = GraphNode(node_id, value)
@@ -138,7 +147,7 @@ class Graph[I, T]:
         Remove a node from the graph by its id
         :param node_id: The node's id
         """
-        if node_id not in self.nodes:
+        if not self.has_node(node_id):
             raise GraphException(f'Node with id {node_id} does not exist.')
 
         del self.nodes[node_id]
@@ -149,46 +158,76 @@ class Graph[I, T]:
             except GraphException:
                 continue
 
-    def is_bidirectional_edge(self, node_one: I, node_two: I) -> bool:
-        """
-        Check if edges exist in two directions between two nodes
-        :param node_one: The first node's ID
-        :param node_two: the second node's ID
-        :return: True if two edges exist, else False
-        """
-        node_one: GraphNode[I, T] = self.nodes[node_one]
-        node_two: GraphNode[I, T] = self.nodes[node_two]
+    def is_edge(self,
+                from_node_id: I,
+                to_node_id: I,
+                bidirectional: bool = False
+                ) -> bool:
 
-        return node_one.is_edge(node_two.node_id) and node_two.is_edge(node_one.node_id)
+        if not self.has_node(from_node_id) or not self.has_node(to_node_id):
+            return False
 
-    def add_bidirectional_edge(self, node_one: I, node_two: I, weight: int = 0) -> None:
-        """
-        Create two edges between two nodes so that each node connects to the other bidirectionally
-        :param node_one: The first node's ID
-        :param node_two: The second node's ID
-        :param weight: The weight of both edges
-        :return:
-        """
-        node_one: GraphNode[I, T] = self.nodes[node_one]
-        node_two: GraphNode[I, T] = self.nodes[node_two]
+        from_node = self.nodes[from_node_id]
+        to_node = self.nodes[to_node_id]
 
-        node_one.add_edge(node_two.node_id, weight)
-        node_two.add_edge(node_one.node_id, weight)
+        if bidirectional:
+            return from_node.is_edge(to_node_id) and to_node.is_edge(from_node_id)
+        else:
+            return from_node.is_edge(to_node_id)
 
-    def remove_bidirectional_edge(self, node_one: I, node_two: I) -> None:
-        """
-        Remove all edges between two nodes, so that both nodes do not connect to each other
-        :param node_one: The first node's ID
-        :param node_two: The second node's ID
-        """
-        if not self.is_bidirectional_edge(node_one, node_two):
-            raise GraphException(f'Bidirectional edge does not exist between nodes {node_one} and {node_two}.')
+    def add_edge(self,
+                 from_node_id: I,
+                 to_node_id: I,
+                 weight: int = 0,
+                 bidirectional: bool = False
+    ) -> None:
+        if not self.has_node(from_node_id):
+            raise GraphException(f'Node with id {from_node_id} does not exist.')
 
-        node_one: GraphNode[I, T] = self.nodes[node_one]
-        node_two: GraphNode[I, T] = self.nodes[node_two]
+        if not self.has_node(to_node_id):
+            raise GraphException(f'Node with id {to_node_id} does not exist.')
 
-        node_one.remove_edge(node_two.node_id)
-        node_two.remove_edge(node_one.node_id)
+        from_node = self.nodes[from_node_id]
+        to_node = self.nodes[to_node_id]
+
+        if not bidirectional and not from_node.is_edge(to_node_id):
+            from_node.add_edge(to_node_id, weight)
+            return
+
+        if bidirectional and from_node_id == to_node_id:
+            raise GraphException('Cannot bidirectional edge with same node')
+
+        if from_node.is_edge(to_node_id) or to_node.is_edge(from_node_id):
+            raise GraphException(f'Edge with id {from_node_id} and id {to_node_id} already exists.')
+
+        from_node.add_edge(to_node_id, weight)
+        to_node.add_edge(from_node_id, weight)
+
+    def remove_edge(
+        self,
+        from_node_id: I,
+        to_node_id: I,
+        bidirectional: bool = False,
+    ) -> None:
+        if not self.has_node(from_node_id):
+            raise GraphException(f'Node with id {from_node_id} does not exist.')
+
+        if not self.has_node(to_node_id):
+            raise GraphException(f'Node with id {to_node_id} does not exist.')
+
+        from_node = self.nodes[from_node_id]
+        to_node = self.nodes[to_node_id]
+
+        if not from_node.is_edge(to_node_id):
+            raise GraphException(f'Unidirectional edge does not exist from {from_node_id} to {to_node_id}.')
+
+        if bidirectional and not to_node.is_edge(from_node_id):
+            raise GraphException(f'Unidirectional edge does not exist from {to_node_id} to {from_node_id}.')
+
+        from_node.remove_edge(to_node_id)
+
+        if bidirectional:
+            to_node.remove_edge(from_node_id)
 
     def search(self, value: T) -> I | list[I] | None:
         """

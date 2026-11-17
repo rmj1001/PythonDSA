@@ -9,13 +9,13 @@ def create_random_graph(nodes: int = 10, edges: bool = False) -> Graph[int, int]
     for num in range(0, nodes, 1):
         graph.insert(num, rand())
 
-    if edges and nodes > 3:
-        graph.nodes[0].add_edge(1)
-        graph.nodes[0].add_edge(2)
-        graph.nodes[1].add_edge(2)
-        graph.nodes[2].add_edge(3)
-        graph.nodes[2].add_edge(0)
-        graph.nodes[3].add_edge(4)
+    if edges and nodes > 4:
+        graph.add_edge(0, 1)
+        graph.add_edge(0, 2)
+        graph.add_edge(1, 2)
+        graph.add_edge(2, 3)
+        graph.add_edge(2, 0)
+        graph.add_edge(3, 4)
 
     return graph
 
@@ -49,7 +49,6 @@ class TestGraph(unittest.TestCase):
     def test_unidirectional_edges(self):
         graph: Graph = create_random_graph(10, edges=True)
 
-        # No edges have been made yet
         self.assertEqual(graph.count_edges(), 6)
 
         # Check number of edges for each node
@@ -64,7 +63,6 @@ class TestGraph(unittest.TestCase):
     def test_remove_node(self):
         graph: Graph = create_random_graph(10, edges=True)
 
-        # Remove node with no edges
         graph.remove_node(1)
         self.assertFalse(graph.node_in_edges(1))
 
@@ -76,25 +74,25 @@ class TestGraph(unittest.TestCase):
         graph: Graph = create_random_graph(10, edges=True)
 
         # No edges exist
-        self.assertFalse(graph.is_bidirectional_edge(3, 0))
+        self.assertFalse(graph.is_edge(3, 0, bidirectional=True))
 
         # One edge exists
-        self.assertFalse(graph.is_bidirectional_edge(1, 2))
+        self.assertFalse(graph.is_edge(1, 2, bidirectional=True))
 
         # Two edges exist
-        self.assertTrue(graph.is_bidirectional_edge(0, 2))
+        self.assertTrue(graph.is_edge(0, 2, bidirectional=True))
 
     def test_add_bidirectional(self):
         graph: Graph = create_random_graph(10, edges=False)
 
-        graph.add_bidirectional_edge(0, 2)
-        self.assertTrue(graph.is_bidirectional_edge(0, 2))
+        graph.add_edge(0, 2, bidirectional=True)
+        self.assertTrue(graph.is_edge(0, 2, bidirectional=True))
 
     def test_remove_bidirectional(self):
         graph: Graph = create_random_graph(10, edges=False)
 
-        graph.add_bidirectional_edge(0, 2)
-        graph.remove_bidirectional_edge(0, 2)
+        graph.add_edge(0, 2, bidirectional=True)
+        graph.remove_edge(0, 2, bidirectional=True)
         self.assertFalse(graph.node_in_edges(0))
         self.assertFalse(graph.node_in_edges(2))
 
@@ -141,12 +139,12 @@ class TestGraph(unittest.TestCase):
         graph.insert(3, 30)
         graph.insert(4, 40)
 
-        graph.nodes[0].add_edge(1)
-        graph.nodes[0].add_edge(2)
-        graph.nodes[1].add_edge(2)
-        graph.nodes[2].add_edge(3)
-        graph.nodes[2].add_edge(0)
-        graph.nodes[3].add_edge(4)
+        graph.add_edge(0, 1)
+        graph.add_edge(0, 2)
+        graph.add_edge(1, 2)
+        graph.add_edge(2, 3)
+        graph.add_edge(2, 0)
+        graph.add_edge(3, 4)
 
         nodes: list[GraphNode] = [node for node in graph.nodes.values()]
         bfs: list[int] = graph.bfs(nodes[0])
@@ -164,12 +162,12 @@ class TestGraph(unittest.TestCase):
         graph.insert(3, 30)
         graph.insert(4, 40)
 
-        graph.nodes[0].add_edge(1)
-        graph.nodes[0].add_edge(2)
-        graph.nodes[1].add_edge(2)
-        graph.nodes[2].add_edge(3)
-        graph.nodes[2].add_edge(0)
-        graph.nodes[3].add_edge(4)
+        graph.add_edge(0, 1)
+        graph.add_edge(0, 2)
+        graph.add_edge(1, 2)
+        graph.add_edge(2, 3)
+        graph.add_edge(2, 0)
+        graph.add_edge(3, 4)
 
         nodes: list[GraphNode] = [node for node in graph.nodes.values()]
         dfs: list[int] = graph.dfs(nodes[0])
@@ -211,16 +209,21 @@ class TestGraph(unittest.TestCase):
 
         # Removing bidirectional edge when none exists
         with self.assertRaises(GraphException):
-            graph.remove_bidirectional_edge(0, 1)
+            graph.remove_edge(0, 1, bidirectional=True)
 
         # Removing bidirectional edge when only unidirectional exists
-        graph.nodes[0].add_edge(1)
+        graph.add_edge(0, 1)
         with self.assertRaises(GraphException):
-            graph.remove_bidirectional_edge(0, 1)
+            graph.remove_edge(0, 1, bidirectional=True)
+        self.assertTrue(graph.is_edge(0, 1))
 
         # Adding bidirectional edge when unidirectional already exists
         with self.assertRaises(GraphException):
-            graph.add_bidirectional_edge(0, 1)
+            graph.add_edge(0, 1, bidirectional=True)
+
+        # test bidirectional self loop
+        with self.assertRaises(GraphException):
+            graph.add_edge(0, 0, bidirectional=True)
 
     def test_traversal_edge_cases(self):
         graph: Graph[int, int] = Graph()
@@ -229,8 +232,8 @@ class TestGraph(unittest.TestCase):
         graph.insert(2, 30)  # Disconnected component
 
         # Self-loop + single edge
-        graph.nodes[0].add_edge(0)
-        graph.nodes[0].add_edge(1)
+        graph.add_edge(0, 1)
+        graph.add_edge(0, 0)
 
         # Should not loop infinitely or duplicate 10; should not reach node 2
         self.assertEqual(graph.bfs(graph.nodes[0]), [10, 20])
