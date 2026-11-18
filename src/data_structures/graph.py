@@ -302,7 +302,7 @@ class Graph[I, T]:
 
         return False
 
-    def bfs(self, start_node: GraphNode[I, T]) -> list[T]:
+    def bfs(self, start_node: GraphNode[I, T] | None = None) -> list[tuple[I, T]]:
         """
         Search through all nodes connected to a start node
         without repeating nodes, by visiting each child
@@ -311,6 +311,9 @@ class Graph[I, T]:
         :param start_node: The starting node
         :returns: List of values from all visited nodes
         """
+        if start_node is None:
+            start_node = next(iter(self.nodes.values()))
+
         if self.nodes.get(start_node.node_id) is not start_node:
             return []
 
@@ -322,7 +325,7 @@ class Graph[I, T]:
 
         while not q.is_empty():
             current = q.dequeue()
-            results.append(current.value)
+            results.append((current.node_id, current.value))
 
             for neighbor_id in current.neighbors.keys():
                 if neighbor_id not in visited:
@@ -331,7 +334,7 @@ class Graph[I, T]:
 
         return results
 
-    def dfs(self, start_node: GraphNode[I, T]) -> list[T]:
+    def dfs(self, start_node: GraphNode[I, T] | None = None) -> list[tuple[I, T]]:
         """
         Search through all nodes connected to a start node
         without repeating nodes, by visiting the descendants
@@ -340,6 +343,9 @@ class Graph[I, T]:
         :param start_node: The starting node
         :returns: List of values from all visited nodes
         """
+        if start_node is None:
+            start_node = next(iter(self.nodes.values()))
+
         if self.nodes.get(start_node.node_id) is not start_node:
             return []
 
@@ -359,6 +365,32 @@ class Graph[I, T]:
                     aux_stack.push(self.nodes[c])
 
             visited.add(current.node_id)
-            results.append(current.value)
+            results.append((current.node_id, current.value))
 
         return results
+
+    def path_exists(self, node1_id: I, node2_id: I, bfs: bool = True) -> bool:
+        """
+        Check to see if a path exists between two nodes
+        :param node1_id: The ID of the first node
+        :param node2_id: The ID of the second node
+        :param bfs: Whether to use BFS (use DFS if False)
+        :return: True if path exists, False otherwise
+        """
+        traversal_list: list[tuple[I, T]] = []
+
+        start_node: GraphNode[I, T] | None = self.nodes.get(node1_id)
+
+        if start_node is None:
+            return False
+
+        if bfs:
+            traversal_list.extend(self.bfs(start_node))
+        else:
+            traversal_list.extend(self.dfs(start_node))
+
+        for node in traversal_list:
+            if node[0] == node2_id:
+                return True
+
+        return False

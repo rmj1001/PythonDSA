@@ -1,5 +1,5 @@
 import unittest
-from src.data_structures.graph import Graph, GraphException, GraphNode
+from graph import Graph, GraphException, GraphNode
 from random import randint
 
 def create_random_graph(nodes: int = 10, edges: bool = False) -> Graph[int, int]:
@@ -147,8 +147,8 @@ class TestGraph(unittest.TestCase):
         graph.add_edge(3, 4)
 
         nodes: list[GraphNode] = [node for node in graph.nodes.values()]
-        bfs: list[int] = graph.bfs(nodes[0])
-        target: list[int] = [0, 10, 20, 30, 40]
+        bfs: list[tuple[int, int]] = graph.bfs(nodes[0])
+        target: list[tuple[int, int]] = [(0, 0), (1, 10), (2, 20), (3, 30), (4, 40)]
 
         self.assertEqual(bfs, target)
 
@@ -170,8 +170,8 @@ class TestGraph(unittest.TestCase):
         graph.add_edge(3, 4)
 
         nodes: list[GraphNode] = [node for node in graph.nodes.values()]
-        dfs: list[int] = graph.dfs(nodes[0])
-        target: list[int] = [0, 20, 30, 40, 10]
+        dfs: list[tuple[int, int]] = graph.dfs(nodes[0])
+        target: list[tuple[int, int]] = [(0, 0), (2, 20), (3, 30), (4, 40), (1, 10)]
 
         self.assertEqual(dfs, target)
 
@@ -236,12 +236,12 @@ class TestGraph(unittest.TestCase):
         graph.add_edge(0, 0)
 
         # Should not loop infinitely or duplicate 10; should not reach node 2
-        self.assertEqual(graph.bfs(graph.nodes[0]), [10, 20])
-        self.assertEqual(graph.dfs(graph.nodes[0]), [10, 20])
+        self.assertEqual(graph.bfs(graph.nodes[0]), [(0, 10), (1, 20)])
+        self.assertEqual(graph.dfs(graph.nodes[0]), [(0, 10), (1, 20)])
 
         # Isolated node traversal
-        self.assertEqual(graph.bfs(graph.nodes[2]), [30])
-        self.assertEqual(graph.dfs(graph.nodes[2]), [30])
+        self.assertEqual(graph.bfs(graph.nodes[2]), [(2, 30)])
+        self.assertEqual(graph.dfs(graph.nodes[2]), [(2, 30)])
 
         # Detached/foreign node not in graph
         foreign_node = GraphNode(0, 10)
