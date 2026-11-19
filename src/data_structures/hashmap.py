@@ -1,7 +1,7 @@
 from collections.abc import Hashable, Iterator, Iterable
 
-type KeyValue[K, V] = tuple[K, V]
-type HashList[K, V] = list[KeyValue[K, V]]
+type KeyValue[K: Hashable, V] = tuple[K, V]
+type HashList[K: Hashable, V] = list[KeyValue[K, V]]
 
 
 class HashMapError(Exception):
