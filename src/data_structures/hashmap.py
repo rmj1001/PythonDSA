@@ -25,6 +25,8 @@ class HashMap[K: Hashable, V]:
     def __eq__(self, other: object, /) -> bool:
         """
         Check if two HashMap objects are equal
+
+        ex. HashMap() == HashMap()
         :param other: Other HashMap object
         :return: True if equal, False otherwise
         """
@@ -37,6 +39,8 @@ class HashMap[K: Hashable, V]:
     def __repr__(self) -> str:
         """
         Create a string representation of the HashMap
+
+        ex. str(HashMap)
         :return: str
         """
         if len(self) == 0:
@@ -55,6 +59,8 @@ class HashMap[K: Hashable, V]:
     def __getitem__(self, key: K) -> V:
         """
         Alias for HashMap.get(key)
+
+        ex. value = HashMap[key]
         :param key: HashMap key
         :return: Value, or raise HashMapError if key doesn't exist
         """
@@ -63,6 +69,8 @@ class HashMap[K: Hashable, V]:
     def __setitem__(self, key: K, value: V) -> None:
         """
         Alias for HashMap.set(key, value)
+
+        ex. HashMap[key] = value
         :param key: HashMap key
         :param value: Value to set
         """
@@ -70,7 +78,9 @@ class HashMap[K: Hashable, V]:
 
     def __delitem__(self, key: K) -> None:
         """
-        Alias for HashMap.delete(key)
+        Alias for HashMap.remove(key)
+
+        ex. del HashMap[key]
         :param key: HashMap key
         """
         self.remove(key)
@@ -78,6 +88,8 @@ class HashMap[K: Hashable, V]:
     def __contains__(self, key: K) -> bool:
         """
         Check if a key exists in the HashMap
+
+        ex. exists: bool = key in HashMap()
         :param key: HashMap key
         :return: True if key exists, False otherwise
         """
@@ -90,6 +102,8 @@ class HashMap[K: Hashable, V]:
     def __len__(self) -> int:
         """
         Get the number of key/value pairs in the HashMap
+
+        ex. len(HashMap) == 0
         :return: Number of key/value pairs
         """
         return self._count
@@ -97,6 +111,8 @@ class HashMap[K: Hashable, V]:
     def __iter__(self) -> Iterator[K]:
         """
         Iterate over the keys in the HashMap
+
+        ex. iter(HashMap())
         :return: Iterator
         """
         for container in self.data:
@@ -106,6 +122,8 @@ class HashMap[K: Hashable, V]:
     def hash(self, key: K) -> int:
         """
         Get an integer representation of the key from 0 - HashMap.size
+
+        ex. HashMap.hash('Test')
         :param key: The key to hash
         :return: int
         """
@@ -114,6 +132,8 @@ class HashMap[K: Hashable, V]:
     def _get_container(self, key: K) -> HashList[K, V]:
         """
         Get the HashList[K, V] of the key
+
+        ex. HashMap._get_container(key)
         :param key: HashMap key
         :return: HashList[K, V]
         """
@@ -123,6 +143,8 @@ class HashMap[K: Hashable, V]:
     def set(self, key: K, value: V) -> None:
         """
         Set a key to a value, or update the value if the key exists
+
+        ex. HashMap.set(key, value)
         :param key: HashMap key
         :param value: Value to set
         """
@@ -140,6 +162,8 @@ class HashMap[K: Hashable, V]:
         """
         Get a value from the HashMap key. If key doesn't exist, return default
         if a default value was provided, else raise HashMapError
+
+        ex. HashMap.get(key, default='Alice')
         :param key: HashMap key
         :param default: Default value to return if key doesn't exist
         :return: Value or default if key doesn't exist
@@ -159,6 +183,8 @@ class HashMap[K: Hashable, V]:
         """
         Remove a key/value pair from the Hashmap based on the key.
         If the key doesn't exist, raise HashMapError.
+
+        ex. HashMap.remove(key)
         :param key: HashMap key
         """
         container: HashList[K, V] = self._get_container(key)
@@ -174,6 +200,8 @@ class HashMap[K: Hashable, V]:
     def entries(self) -> Iterator[KeyValue[K, V]]:
         """
         Iterate over all key/value pairs in the HashMap
+
+        Ex. for k, v in HashMap.entries()
         :return: Iterator containing all key/value pairs
         """
         for container in self.data:
@@ -183,6 +211,8 @@ class HashMap[K: Hashable, V]:
     def keys(self) -> Iterator[K]:
         """
         Iterate over all keys in the HashMap
+
+        ex. for k in HashMap.keys()
         :return: Iterator containing all keys
         """
         return iter(self)
@@ -190,6 +220,8 @@ class HashMap[K: Hashable, V]:
     def values(self) -> Iterator[V]:
         """
         Iterate over all values in the HashMap
+
+        ex. for v in HashMap.values()
         :return: Iterator containing all values
         """
         for container in self.data:
