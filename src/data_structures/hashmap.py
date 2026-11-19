@@ -119,7 +119,7 @@ class HashMap[K: Hashable, V]:
             for k, _ in container:
                 yield k
 
-    def hash(self, key: K) -> int:
+    def _hash(self, key: K) -> int:
         """
         Get an integer representation of the key from 0 - HashMap.size
 
@@ -137,7 +137,7 @@ class HashMap[K: Hashable, V]:
         :param key: HashMap key
         :return: HashList[K, V]
         """
-        index = self.hash(key)
+        index = self._hash(key)
         return self.data[index]
 
     def set(self, key: K, value: V) -> None:
