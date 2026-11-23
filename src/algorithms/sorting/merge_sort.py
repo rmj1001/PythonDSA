@@ -1,4 +1,4 @@
-from copy import deepcopy
+from unittest import TestCase, main as umain
 
 
 def merge[T](left: list[T], right: list[T]) -> list[T]:
@@ -7,7 +7,7 @@ def merge[T](left: list[T], right: list[T]) -> list[T]:
     j = 0
 
     while i < len(left) and j < len(right):
-        if left[i] < right[j]:
+        if left[i] <= right[j]:
             result.append(left[i])
             i += 1
         else:
@@ -20,10 +20,7 @@ def merge[T](left: list[T], right: list[T]) -> list[T]:
     return result
 
 
-def merge_sort[T](arr: list[T], copy: bool = True) -> list[T]:
-    if copy:
-        arr = deepcopy(arr)
-
+def merge_sort[T](arr: list[T]) -> list[T]:
     if len(arr) <= 1:
         return arr
 
@@ -35,3 +32,17 @@ def merge_sort[T](arr: list[T], copy: bool = True) -> list[T]:
     sorted_right = merge_sort(right)
 
     return merge(sorted_left, sorted_right)
+
+
+class TestMergeSort(TestCase):
+    def test_merge_sort(self):
+        arr = [10, 8, 9, 7, 33, 45, 68, 91]
+
+        arr_target = arr.copy()
+        arr_target.sort()
+
+        self.assertEqual(merge_sort(arr), arr_target)
+
+
+if __name__ == '__main__':
+    umain()

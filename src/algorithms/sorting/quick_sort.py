@@ -1,6 +1,11 @@
-from copy import deepcopy
+from unittest import TestCase, main as umain
 
-from src.lib.algos.sorting.swap import swap
+
+def swap[T](arr: list[T], index1: int, index2: int) -> None:
+    """Swap two elements in-place in an array"""
+    temp = arr[index1]
+    arr[index1] = arr[index2]
+    arr[index2] = temp
 
 
 def split[T](arr: list[T], start: int, end: int) -> int:
@@ -17,11 +22,8 @@ def split[T](arr: list[T], start: int, end: int) -> int:
     return i + 1
 
 
-def quick_sort[T](arr: list[T], start: int = 0, end: int = -1, copy: bool = True) -> list[T]:
+def quick_sort[T](arr: list[T], start: int = 0, end: int = -1) -> list[T]:
     """Quick sort a list[T]"""
-    if copy:
-        arr = deepcopy(arr)
-
     # Set start and end to the first and last element of the array if they aren't passed as args
     end = len(arr) - 1 if end == -1 else end
 
@@ -31,3 +33,17 @@ def quick_sort[T](arr: list[T], start: int = 0, end: int = -1, copy: bool = True
         quick_sort(arr, pivot + 1, end)
 
     return arr
+
+
+class TestQuickSort(TestCase):
+    def test_quick_sort(self):
+        arr = [10, 8, 9, 7, 33, 45, 68, 91]
+
+        arr_target = arr.copy()
+        arr_target.sort()
+
+        self.assertEqual(quick_sort(arr), arr_target)
+
+
+if __name__ == '__main__':
+    umain()
